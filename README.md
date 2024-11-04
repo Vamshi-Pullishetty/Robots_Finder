@@ -17,3 +17,48 @@ git clone https://github.com/Vamshi-Pullishetty/Robots_Finder.git
 cd Robots_Finder
 pip install -r requirements.txt
 ```
+
+# Usage
+Run the program by providing a URL with the -u flag:
+
+```
+python3 robot.py -u https://example.com
+```
+
+# Additional Options
+- Save output to file:
+```
+python3 robot.py -u https://example.com -o results.txt
+```
+
+- Concatenate paths with site URL:
+```
+python3 robot.py -u https://example.com -c
+```
+
+- Run in silent mode (no console output):
+```
+python3 robot.py -u https://example.com --silent
+```
+
+- Multi-threading (default recommended: 10 threads):
+```
+python3 robot.py -u https://example.com -t 10 -c -o results.txt
+```
+
+# Example
+To run Robofinder on https://example.com and save the result to results.txt with 10 threads:
+```
+python3 robot.py -u https://example.com -t 10 -o results.txt
+```
+
+
+
+
+
+
+
+
+
+
+
