@@ -8,3 +8,12 @@ A simple tool to quickly locate and retrieve robots.txt files from websites. Use
 - Save search results to a file.
 - Run the tool without console output (silent mode).
 - Speed up searches with adjustable multi-threading.
+
+# Installation
+Clone the repository and install the required dependencies:
+
+```
+git clone https://github.com/Vamshi-Pullishetty/Robots_Finder.git
+cd Robots_Finder
+pip install -r requirements.txt
+```
