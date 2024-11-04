@@ -27,7 +27,7 @@ def setup_argparse():
     parser = argparse.ArgumentParser(description="Robo Finder")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debugging mode.")
     parser.add_argument('--url', '-u', required=True, help='Specify the target URL.')
-    parser.add_argument('--output', '-o', default=False, help='Output file path.')
+    parser.add_argument('--output', '-o', default=None, help='Output file path.')
     parser.add_argument('--threads', '-t', default=10, type=int, help='Number of threads to use.')
     parser.add_argument('-c', action="store_true", default=False, help='Concatenate paths with site URL.')
     return parser.parse_args()
@@ -42,7 +42,7 @@ def extract(response):
     for match in matches:
         directives_found = directive_regex.findall(match)
         directives.extend(directive[1] for directive in directives_found)
-    
+
     return directives
 
 def get_all_links(args) -> list:
@@ -82,7 +82,7 @@ def concatenate(args, results) -> list:
             concatenated.append(path)
     return concatenated
 
-def fetch_files(url: str) -> str:
+def fetch_files(url: str, args) -> str:  # Include args
     """Fetch the content of a robots.txt file."""
     session = get_session()
     max_retries = 3
@@ -95,10 +95,15 @@ def fetch_files(url: str) -> str:
             logger(args.debug, f"HTTP Request sent to {url}.")
             response.raise_for_status()
             break
-        except (requests.exceptions.RequestException) as e:
+        except requests.exceptions.Timeout:
+            logger(args.debug, f"Timeout error for {url}. Retrying...")
+        except requests.exceptions.ConnectionError:
+            logger(args.debug, f"Connection error for {url}. Retrying...")
+        except requests.exceptions.RequestException as e:
             logger(args.debug, f"Request error: {e}. Retrying...")
-            time.sleep(1)
-            retry_count += 1
+        
+        time.sleep(1)  # Wait before retrying
+        retry_count += 1
 
     return response.text if response else ""
 
@@ -114,7 +119,7 @@ def start_process(urls, args) -> list:
     logger(args.debug, "Fetching robots.txt files from multiple URLs.")
 
     with ThreadPoolExecutor(max_workers=args.threads) as executor:
-        for resp in executor.map(fetch_files, urls):
+        for resp in executor.map(lambda url: fetch_files(url, args), urls):  # Pass args
             if resp:
                 responses.append(resp)
 
@@ -124,7 +129,7 @@ def main():
     args = setup_argparse()
     start_time = time.time()
     logger(args.debug, "Starting the program.")
-    
+
     url_list = get_all_links(args)
     responses = start_process(url_list, args)
 
